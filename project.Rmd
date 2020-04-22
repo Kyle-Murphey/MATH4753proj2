@@ -434,10 +434,28 @@ abline(wine.alc)
 plot(wine$quality~wine$volatile.acidity,bg="Blue",pch=21,cex=1.2,data=wine)
 abline(wine.va)
 ```
+
 These plots do not indicate that a linear model is the best fit for the data.
 
 ## Plot Residuals
 
+The residuals tell us by how much points deviate from the fitted line. They help us to see just how far the points are varying from the line.
+```{r}
+plot(wine$quality~wine$alcohol,bg="Green",pch=21,cex=1.2,data=wine)
+abline(wine.alc)
+yhat=with(wine,predict(wine.alc,data.frame(alcohol)))
+with(wine,{segments(alcohol,quality,alcohol,yhat)})
+abline(wine.alc)
+```
+```{r}
+plot(wine$quality~wine$volatile.acidity,bg="Maroon",pch=21,cex=1.2,data=wine)
+abline(wine.va)
+yhat=with(wine,predict(wine.va,data.frame(volatile.acidity)))
+with(wine,{segments(volatile.acidity,quality,volatile.acidity,yhat)})
+abline(wine.va)
+```
+
+As you can see, there is *quite* a lot of deviation from the line.
 
 
 ## Checks on validity
