@@ -402,14 +402,43 @@ As you can see in the preliminary graphs, the data is mostly distributed noramll
 Given these assumptions, we should be able to produce some estimates for the $\beta$ parameters.
 
 
-## Main result 1
-## Main result 2
-## Main result 3 etc
+# Estimating the Parameters
 
-# Validity with mathematical expressions
+Since the data isn't very linear and there are a lot of independent variables, I will be selecting 2 independent variables that show the best fit based on their multiple $R^2$ value. The 2 variables with the highest multiple $R^2$ values are alcohol and volatile acidity.
+
+```{r}
+summary(wine.alc)
+summary(wine.va)
+```
+With multiple $R^2$ values of 0.2267 and 0.1525, respectively. While very low, they are the best I have to work with.
+Based on these summaries, we can say that $$\hat{\beta_{0a}}=1.87497$$ $$\hat{\beta_{1a}}=0.36084$$ and $$\hat{\beta_{0v}}=6.56575$$ $$\hat{\beta_{1v}}=-1.76144$$
+
+## Confidence Interval
+```{r}
+ciReg(wine.alc,conf.level=0.95,print.out=TRUE)
+ciReg(wine.va,conf.level=0.95,print.out=TRUE)
+```
+
+## The Least-Squares Estimates
+
+$$\hat{\beta_{0a}}+\hat{\beta_{1a}}x_i=1.87497+0.36084x_i$$ $$\hat{\beta_{0v}}+\hat{\beta_{1v}}x_i=6.56575-1.76144x_i$$ The slope $\hat{\beta_{1a}}=0.36084$ tells us that the quality rises 0.36084 for every 1 increase in alcohol. The slope $\hat{\beta_{1v}}=-1.76144$ tells us that the quality lowers -1.76144 for every 1 increase in volatile acidity.
+
+# Verifying Assumptions
+
+I will attempt to verify the above assumptions to show whether or not a straight line is the best fit for the model.
+```{r}
+plot(wine$quality~wine$alcohol,bg="Purple",pch=21,cex=1.2,data=wine)
+abline(wine.alc)
+```
+```{r}
+plot(wine$quality~wine$volatile.acidity,bg="Blue",pch=21,cex=1.2,data=wine)
+abline(wine.va)
+```
+These plots do not indicate that a linear model is the best fit for the data.
+
+## Plot Residuals
 
 
-The following function was taken from [https://rpubs.com/therimalaya/43190](https://rpubs.com/therimalaya/43190)
 
 ## Checks on validity
 
