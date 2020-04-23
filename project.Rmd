@@ -53,65 +53,6 @@ library(dplyr)
 #</video>
 ```
 
-```{r}
-library(s20x)
-wine=read.csv("winequality-red.csv")
-
-trendscatter(wine$quality~wine$volatile.acidity,f=0.3,data=wine)
-wine.fit=lm(wine$quality~wine$volatile.acidity,data=wine)
-summary(wine.fit)
-eovcheck(wine.fit)
-summary(wine.fit)
-plot(wine$quality~wine$volatile.acidity,main="Fitted model",xlab="alcohol",ylab="quality",data=wine)
-abline(wine.fit)
-ciReg(wine.fit)
-plot(wine.fit,which=1)
-normcheck(wine.fit, shapiro.wilk = TRUE)
-cooks20x(wine.fit)
-```
-
-```{r}
-wine.ph=lm(wine$quality~wine$pH,data=wine)
-wine.tsd=lm(wine$quality~wine$total.sulfur.dioxide,data=wine)
-wine.alcohol=lm(wine$quality~wine$alcohol,data=wine)
-wine.va=lm(wine$quality~wine$volatile.acidity,data=wine)
-wine.fsd=lm(wine$quality~wine$free.sulfur.dioxide,data=wine)
-wine.fa=lm(wine$quality~wine$fixed.acidity,data=wine)
-wine.rs=lm(wine$quality~wine$residual.sugar,data=wine)
-wine.chl=lm(wine$quality~wine$chlorides,data=wine)
-wine.dens=lm(wine$quality~wine$density,data=wine)
-wine.ca=lm(wine$quality~wine$citric.acid,data=wine)
-summary(wine.ph)
-summary(wine.tsd)
-summary(wine.alcohol)
-summary(wine.va)
-summary(wine.fsd)
-summary(wine.fa)
-summary(wine.rs)
-summary(wine.chl)
-summary(wine.dens)
-summary(wine.ca)
-```
-
-```{r}
-library(d3scatter)
-library(crosstalk)
-library(leaflet)
-library(DT)
-
-shared_wine <- SharedData$new(wine[])
-bscols(widths = c(5,NA,NA),
-  list(
-    filter_checkbox("quality", "Quality", shared_wine, ~quality, inline = TRUE),
-    filter_slider("sulphates", "Sulphates", shared_wine, ~sulphates, width = "100%")#,
-    #filter_select("auto", "Automatic", shared_mtcars, ~ifelse(am == 0, "Yes", "No"))
-  ),
-  d3scatter(shared_wine, ~sulphates, ~quality, ~factor(pH), width="100%", height=250),
-  d3scatter(shared_wine, ~sulphates, ~quality, ~factor(quality), width="100%", height=250)
-)
-```
-
-
 # Introduction
 
 <!--
@@ -140,16 +81,6 @@ Although there are still religious rituals that use wine, such as the Christian 
 
 With that much wine being sold in just America alone, companies have plenty of motivation to produce quality wines for people to enjoy. When it comes to the quality of a wine, much is subjective. How do you quantify quality of taste? The wine must be tasted by humans in order to determine the quality. With such subjective testing, its difficult to find what properties of the wine that people like. In order to try to find a trend in quality, various physiochemical properties have been recorded along with their coinsiding quality rating in this dataset.
 
-<!--
-The data was collected here:
-
-```{r map, echo=FALSE, fig.align='center'}
-leaflet() %>%
-  setView(lng=-97.445717, lat=35.205894, zoom= 16) %>% 
-  addTiles() %>%
-  addMarkers(lng=-97.445717, lat=35.205894, popup="We collected grasshoppers here!! Dr Stewart helped.") 
-```
--->
 
 ## My Interest
 
@@ -170,10 +101,11 @@ I will analyze the data in an attempt to find a correlation between the amount c
 
 ## Preliminary Plots and Interpretation of the Data
 
-There are a lot of factors that could play a roll in the quality of the wine. I will show graphs of the wine quality given each compound.
+There are a lot of factors that could play a roll in the quality of the wine. I will show graphs of the wine quality given each compound below. Each compound come with 3 graphs: a scatterplot, a residual vs fitted, and a histogram. The scatter plots and histograms are to show the distribution of the data and the frequency. The residual vs fitted will be discussed later on in the document.
 
 ### Quality~Fixed Acidity
 ```{r, echo=FALSE}
+library(s20x)
 library(ggplot2)
 wine.fix=lm(wine$quality~wine$fixed.acidity,data=wine)
 wine.stder=rstandard(wine.fix)
@@ -182,29 +114,17 @@ par(mfrow=c(2,2))
 plot(wine$fixed.acidity,wine$quality, main="Scatterplot of fixed acidity vs. quality")
 plot(wine.fix,which=1)
 hist(wine$fixed.acidity, main="Histogram of fixed acidity")
-qqnorm(wine.stder)
-qqline(wine.stder,col="Blue")
-shapiro.test(wine.stder)
-g=ggplot(wine, aes(x=fixed.acidity,y=quality)) + geom_point()
-g=g+geom_smooth(method="loess")
-g
 ```
 
 ### Quality~Volatile Acidity
 ```{r, echo=FALSE}
-wine.vol=lm(wine$quality~wine$volatile.acidity,data=wine)
-wine.stder=rstandard(wine.vol)
+wine.va=lm(wine$quality~wine$volatile.acidity,data=wine)
+wine.stder=rstandard(wine.va)
 
 par(mfrow=c(2,2))
 plot(wine$volatile.acidity,wine$quality, main="Scatterplot of volatile acidity vs. quality")
-plot(wine.vol,which=1)
+plot(wine.va,which=1)
 hist(wine$volatile.acidity, main="Histogram of volatile acidity")
-qqnorm(wine.stder)
-qqline(wine.stder,col="Blue")
-shapiro.test(wine.stder)
-g=ggplot(wine, aes(x=volatile.acidity,y=quality)) + geom_point()
-g=g+geom_smooth(method="loess")
-g
 ```
 
 ### Quality~Citric Acid
@@ -216,12 +136,6 @@ par(mfrow=c(2,2))
 plot(wine$citric.acid,wine$quality, main="Scatterplot of citric acid vs. quality")
 plot(wine.ca,which=1)
 hist(wine$citric.acid, main="Histogram of citric acid")
-qqnorm(wine.stder)
-qqline(wine.stder,col="Blue")
-shapiro.test(wine.stder)
-g=ggplot(wine, aes(x=citric.acid,y=quality)) + geom_point()
-g=g+geom_smooth(method="loess")
-g
 ```
 
 ### Quality~Residual Sugar
@@ -233,12 +147,6 @@ par(mfrow=c(2,2))
 plot(wine$residual.sugar,wine$quality, main="Scatterplot of residual sugar vs. quality")
 plot(wine.rs,which=1)
 hist(wine$residual.sugar, main="Histogram of residual sugar")
-qqnorm(wine.stder)
-qqline(wine.stder,col="Blue")
-shapiro.test(wine.stder)
-g=ggplot(wine, aes(x=residual.sugar,y=quality)) + geom_point()
-g=g+geom_smooth(method="loess")
-g
 ```
 
 ### Quality~Chlorides
@@ -250,12 +158,6 @@ par(mfrow=c(2,2))
 plot(wine$chlorides,wine$quality, main="Scatterplot of chlorides vs. quality")
 plot(wine.chl,which=1)
 hist(wine$chlorides, main="Histogram of chlorides")
-qqnorm(wine.stder)
-qqline(wine.stder,col="Blue")
-shapiro.test(wine.stder)
-g=ggplot(wine, aes(x=chlorides,y=quality)) + geom_point()
-g=g+geom_smooth(method="loess")
-g
 ```
 
 ### Quality~Free Sulfur Dioxide
@@ -267,12 +169,6 @@ par(mfrow=c(2,2))
 plot(wine$free.sulfur.dioxide,wine$quality, main="Scatterplot of free sulfur dioxide vs. quality")
 plot(wine.fsd,which=1)
 hist(wine$free.sulfur.dioxide, main="Histogram of free sulfur dioxide")
-qqnorm(wine.stder)
-qqline(wine.stder,col="Blue")
-shapiro.test(wine.stder)
-g=ggplot(wine, aes(x=free.sulfur.dioxide,y=quality)) + geom_point()
-g=g+geom_smooth(method="loess")
-g
 ```
 
 ### Quality~Total Sulfur Dioxide
@@ -284,12 +180,6 @@ par(mfrow=c(2,2))
 plot(wine$total.sulfur.dioxide,wine$quality, main="Scatterplot of total sulfur dioxide vs. quality")
 plot(wine.tsd,which=1)
 hist(wine$total.sulfur.dioxide, main="Histogram of total sulfur dioxide")
-qqnorm(wine.stder)
-qqline(wine.stder,col="Blue")
-shapiro.test(wine.stder)
-g=ggplot(wine, aes(x=total.sulfur.dioxide,y=quality)) + geom_point()
-g=g+geom_smooth(method="loess")
-g
 ```
 
 ### Quality~Density
@@ -301,12 +191,6 @@ par(mfrow=c(2,2))
 plot(wine$density,wine$quality, main="Scatterplot of density vs. quality")
 plot(wine.dens,which=1)
 hist(wine$density, main="Histogram of density")
-qqnorm(wine.stder)
-qqline(wine.stder,col="Blue")
-shapiro.test(wine.stder)
-g=ggplot(wine, aes(x=density,y=quality)) + geom_point()
-g=g+geom_smooth(method="loess")
-g
 ```
 
 ### Quality~pH
@@ -318,12 +202,6 @@ par(mfrow=c(2,2))
 plot(wine$pH,wine$quality, main="Scatterplot of pH vs. quality")
 plot(wine.ph,which=1)
 hist(wine$pH, main="Histogram of pH")
-qqnorm(wine.stder)
-qqline(wine.stder,col="Blue")
-shapiro.test(wine.stder)
-g=ggplot(wine, aes(x=pH,y=quality)) + geom_point()
-g=g+geom_smooth(method="loess")
-g
 ```
 
 ### Quality~Sulphates
@@ -335,12 +213,6 @@ par(mfrow=c(2,2))
 plot(wine$sulphates,wine$quality, main="Scatterplot of sulphates vs. quality")
 plot(wine.sul,which=1)
 hist(wine$sulphates, main="Histogram of sulphates")
-qqnorm(wine.stder)
-qqline(wine.stder,col="Blue")
-shapiro.test(wine.stder)
-g=ggplot(wine, aes(x=sulphates,y=quality)) + geom_point()
-g=g+geom_smooth(method="loess")
-g
 ```
 
 ### Quality~Alcohol
@@ -352,12 +224,6 @@ par(mfrow=c(2,2))
 plot(wine$alcohol,wine$quality, main="Scatterplot of alcohol vs. quality")
 plot(wine.alc,which=1)
 hist(wine$alcohol, main="Histogram of alcohol")
-qqnorm(wine.stder)
-qqline(wine.stder,col="Blue")
-shapiro.test(wine.stder)
-g=ggplot(wine, aes(x=alcohol,y=quality)) + geom_point()
-g=g+geom_smooth(method="loess")
-g
 ```
 
 
@@ -621,85 +487,70 @@ While neither model is very good for the data, we have evidence that the quadrat
 
 # ANOVA as Confirmation
 
+```{r}
+wine.aova=aov(quality~alcohol,data=wine)
+wine.aovv=aov(quality~volatile.acidity,data=wine)
+summary(wine.aova)
+summary(wine.aovv)
+```
+The pvalues for these anova sets and significantly below 0.05, so this test rejects the Null hypothesis. We can say that the ANOVA confirms that this model is not grea for the given data. There is nearly no chance that an F ratio greater than the Null value will be true.
 
 
 
+# Avoiding Bias with Cook's Distance
 
-## Use adjusted $R^2$ 
-$$R_{adj}^2 =$$
+Biases can skew the data you are trying to analyze. Biases are often caused by outliers. Outliers can influence trends and skew the overall quality of the data. Cook's distance calculates the effects of removing said outliers. It estimates the influence that the data point has on the output. If the point is far enough away from other values, we need to take a deeper look at the data without these points.
 
+## Alcohol
+```{r}
+cooks20x(wine.alc)
+```
 
+653 is far and beyond the rest of the values. This data point has the potential the skew the data, so I will make a new model excluding it.
 
+```{r}
+wine2.alc=lm(quality~alcohol,data=wine[-653,])
+summary(wine2.alc)
+```
+The multiple $R^2$ for the model increased to 0.2314, but it did not increase enough say that this point had enough sway to throw the whole model off.
 
-### Check on outliers using cooks plots
+## Volatile Acidity
+```{r}
+cooks20x(wine.va)
+```
 
-Remember to interpret this plot and all other plots
+391 is the farthest value for the volatile acidity, so that is the value I will take out and re-examine.
 
+```{r}
+wine2.va=lm(quality~volatile.acidity,data=wine[-391,])
+summary(wine2.va)
+```
+The multiple $R^2$ for the model increased to 0.1563, but it did not increase enough say that this point had enough sway to throw the whole model off.
 
 
 # Conclusion
-## Answer your research question
-## Suggest ways to improve model or experiment
+
+In conclusion, there is no linear correlation between the physiochemical properties and the quality of the wine. The dataset has high variations from the fitted line and is at best is around a 23% match to the model (for quality~alcohol). While there might be "peak" points in this data, it does not help us when trying to find a linear trend. As with most things, such as cooking, we can expect that adding too much of one thing will decrease the quality. Knowing this, we could probably improve the data to fit the model by "stress-testing" each compound to find the point at which the quality begins to decrease indefinitely. This, along with recording each independent variable an even amount of times (i.e., if 10 tests were run on samples with an alcohol level of 9.4, then 10 tests should be run on samples with alcohol levels of 9.5, and so on), and measurements taken at more evenly spaced intervals, the data set would fit the linear model better, given there is a statistical relationship at all. The quadratic model ending up fitting the data better than the linear model, but just barely. I was unable to come up with any significant relationship between the properties of the wine and the overall quality. That being said, it does not mean that a correlation does not exist. It just means that I was unable to find a linear correlation given my skills in the subject area.
 
 
 # References
   
   
   
-  
-<!--
-```{r datacars}
-data(mtcars)
-
-library(DT)
-datatable(
-  mtcars,filter = 'top', options = list(
-  pageLength = 5, autoWidth = TRUE, editable = TRUE, dom = 'Bfrtip',
-    buttons = c('copy', 'csv', 'excel', 'pdf', 'print')),
-caption = htmltools::tags$caption(
-    style = 'caption-side: bottom; text-align: center;',
-    'Table 2: ', htmltools::em('This is a simple caption for the table.')
-  )
-) %>%
-  formatStyle('mpg',  color = 'red', backgroundColor = 'orange', fontWeight = 'bold')
 
 
-```
-
-```{r crosstalk}
-library(crosstalk)
-library(leaflet)
-library(DT)
-
-# Wrap data frame in SharedData
-sd <- SharedData$new(quakes[sample(nrow(quakes), 100),])
-
-# Create a filter input
-filter_slider("mag", "Magnitude", sd, column=~mag, step=0.1, width=250)
-
-# Use SharedData like a dataframe with Crosstalk-enabled widgets
-bscols(
-  leaflet(sd) %>% addTiles() %>% addMarkers(),
-  datatable(sd, extensions="Scroller", style="bootstrap", class="compact", width="100%",
-    options=list(deferRender=TRUE, scrollY=300, scroller=TRUE))
-)
-```
 
 
-```{r}
-#devtools::install_github("jcheng5/d3scatter")
 
-library(d3scatter)
 
-shared_mtcars <- SharedData$new(mtcars)
-bscols(widths = c(3,NA,NA),
-  list(
-    filter_checkbox("cyl", "Cylinders", shared_mtcars, ~cyl, inline = TRUE),
-    filter_slider("hp", "Horsepower", shared_mtcars, ~hp, width = "100%"),
-    filter_select("auto", "Automatic", shared_mtcars, ~ifelse(am == 0, "Yes", "No"))
-  ),
-  d3scatter(shared_mtcars, ~wt, ~mpg, ~factor(cyl), width="100%", height=250),
-  d3scatter(shared_mtcars, ~hp, ~qsec, ~factor(cyl), width="100%", height=250)
-)
-```
--->
+
+
+
+
+
+
+
+
+
+
+
