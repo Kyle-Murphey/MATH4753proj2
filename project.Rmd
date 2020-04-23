@@ -3,6 +3,17 @@ title: "MATH 4753 Project 2"
 author: "Kyle Murphey"
 date:  "`r format(Sys.time(), '%d %B, %Y')`"
 output:
+  pdf_document:
+    df_print: kable
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 7
+    highlight: tango
+    toc: yes
+    toc_depth: 4
+  word_document:
+    toc: yes
+    toc_depth: 4
   html_document:
     code_folding: show
     csl: biomed-central.csl
@@ -14,28 +25,16 @@ output:
     theme: journal
     toc: yes
     toc_float: yes
-  word_document:
-    toc: yes
-    toc_depth: 4
-  pdf_document:
-    df_print: kable
-    fig_caption: yes
-    fig_height: 6
-    fig_width: 7
-    highlight: tango
-    toc: yes
-    toc_depth: 4
+bibliography: project.bib
 abstract: This project is all about applications of SLR to real data using R. I am using a set of data containing the quality of red wine based on various physiochemical properties. The data for this project was found in a UCI archive for machine learning. I will be using this dataset and my leanrings from this semester to analyze the data. The goal is to use Simple Linear Regression on the data to find the correlation between the properties and the overall taste quality of the red wine. I aim to find whether or not there is a correlation to these properties and how we as humans rate their qualities.
 ---
 
-```{r}
-#<center>
 
-#![Dr. Wayne Stewart](wayne.jpg "My Picture"){ width=20% }
+<center>
 
-#</center>
-```
+![Kyle Murphey](me.jpg "My Picture"){ width=20% }
 
+</center>
 
 
 
@@ -45,38 +44,26 @@ library(leaflet)
 library(dplyr)
 ```
 
-# My Video
-```{r}
+<!--
 #<video width="320" height="240" controls>
 #  <source src="usingvideoinrmd.mp4" type="video/mp4">
 #Your browser does not support the video tag.
 #</video>
-```
-
+-->
 # Introduction
 
-<!--
-bibliography: project.bib
-
-
-
-Here you should introduce the data and the problem you wish to solve.
-Use your  own subheadings. Fill with informative sentences and pictures and links.
-You may inclucde sub-sub headings.
-You can cite from your bibliography [see @millar and @crawley]
--->
-
-
-Wine is one of humanities oldest alcoholic beverages. It has been used recreationally, religiously, and medicinally throughout the millennia. Wine was seen as a creation by the Greek god Dionysos (or Bacchus, if you were Roman) to the people. It was said that the god gifted the vine to a man named Ikarios. Ikarios used this gift to make wine, which he was inclined to share with his fellow people. When he shared the wine, the others got freaked out by the effects, thinking that they had been poisoned. They ended up murdering Ikarios, and his creation spread from there.
+Wine is one of humanities oldest alcoholic beverages. It has been used recreationally, religiously, and medicinally throughout the millennia. Wine was seen as a creation by the Greek god Dionysos (or Bacchus, if you were Roman) to the people. It was said that the god gifted the vine to a man named Ikarios. Ikarios used this gift to make wine, which he was inclined to share with his fellow people. When he shared the wine, the others got freaked out by the effects, thinking that they had been poisoned. They ended up murdering Ikarios, and his creation spread from there. Image and information found: [see @wine]
 
 <center>
-![Dionysos](https://www.ancient.eu/uploads/images/884.jpg?v=1569519612 "Dionysos"){ width=80% }
+![Dionysos, https://www.ancient.eu/uploads/images/884.jpg?v=1569519612](https://www.ancient.eu/uploads/images/884.jpg?v=1569519612 "picture of Dionysos"){ width=80% }
+
 </center>
 
-Although there are still religious rituals that use wine, such as the Christian ritual known as "communion" or the "Eucharist", it is used far more frequently for recreational purposes. Wine makes up roughly 11.4% of all alcohol sold in America, which comes out to ~ 3.8 billion liters of the fruity beverage.
+Although there are still religious rituals that use wine, such as the Christian ritual known as "communion" or the "Eucharist", it is used far more frequently for recreational purposes. Wine makes up roughly 11.4% of all alcohol sold in America, which comes out to ~ 3.8 billion liters of the fruity beverage. Image and information found: [see @abm]
 
 <center>
-![Alcohol](https://www.parkstreet.com/wp-content/uploads/US-Market-Overview-Graph-1.jpg "wine sold"){ width=80% }
+![Beverage sale in the US, https://www.parkstreet.com/alcoholic-beverage-market-overview/](https://www.parkstreet.com/wp-content/uploads/US-Market-Overview-Graph-1.jpg "wine sold"){ width=80% }
+
 </center>
 
 With that much wine being sold in just America alone, companies have plenty of motivation to produce quality wines for people to enjoy. When it comes to the quality of a wine, much is subjective. How do you quantify quality of taste? The wine must be tasted by humans in order to determine the quality. With such subjective testing, its difficult to find what properties of the wine that people like. In order to try to find a trend in quality, various physiochemical properties have been recorded along with their coinsiding quality rating in this dataset.
@@ -227,15 +214,9 @@ hist(wine$alcohol, main="Histogram of alcohol")
 ```
 
 
-### Sub sub headings can be useful
-Testing[^1]
-
-[^1]: A little footnote
-
-
 # Theory behind the Analysis
 
-As you can see in the preliminary graphs, the data is mostly distributed noramlly, but there isn't much of a linear trend to analyze. I believe that the quality would drop given that too much of any one compound is in the wine. That being said, I will still attempt to find some linear correlation within the data, even if the relationship is minimal. The histograms show that the independent variables have an uneven distribution of the frequency of values tested. This can cause unexpected and faux trends in the data. Even though this may skew some results, I will conveniently ignore those facts in order to produce some sort of regressional analysis. I will be make a probabilistic model of a simple linear regression. The model assumes that the line produce by $\bar{y}$ given any value of $x$. Any deviating points are are represented by $\epsilon$. The equation of the line is: $$y=\beta_0+\beta_1x_i+\epsilon_i$$ The variables $\beta_0$, $\beta_1$, and $\epsilon_i$ are as follows: $\beta_0$ and $\beta_1$ are random variables, and $\epsilon_i$ is the random error. If you drop $\epsilon_i$, you get the equation for $\bar{y}$ given any value of $x$. This can be represented as such: $$E(y)=E(\beta_0+\beta_1x_i+\epsilon_i)$$ $$=\beta_0+\beta_1x_i+E(\epsilon_i)$$ $$=\beta_0+\beta_1x_i$$ Given this information, we can represent this as $E(Y|x)$ where $\beta_0$ is the y-intercept and $\beta_1$ is the slope. According to Mendenhall and Sinich 2016, we need to make the following assumptions about $\epsilon$ in order to estimate the $\beta$ parameters. These assumptions are: 
+As you can see in the preliminary graphs, the data appears scattered randomly, and that there isn't much of a linear trend to analyze. I believe that the quality would drop given that too much of any one compound is in the wine. That being said, I will still attempt to find some linear correlation within the data, even if the relationship is minimal. The histograms show that the independent variables have an uneven distribution of the frequency of values tested. This can cause unexpected and faux trends in the data. Even though this may skew some results, I will conveniently ignore those facts in order to produce some sort of regressional analysis. I will be make a probabilistic model of a simple linear regression. The model assumes that the line produce by $\bar{y}$ given any value of $x$. Any deviating points are are represented by $\epsilon$. The equation of the line is: $$y=\beta_0+\beta_1x_i+\epsilon_i$$ The variables $\beta_0$, $\beta_1$, and $\epsilon_i$ are as follows: $\beta_0$ and $\beta_1$ are random variables, and $\epsilon_i$ is the random error. If you drop $\epsilon_i$, you get the equation for $\bar{y}$ given any value of $x$. This can be represented as such: $$E(y)=E(\beta_0+\beta_1x_i+\epsilon_i)$$ $$=\beta_0+\beta_1x_i+E(\epsilon_i)$$ $$=\beta_0+\beta_1x_i$$ Given this information, we can represent this as $E(Y|x)$ where $\beta_0$ is the y-intercept and $\beta_1$ is the slope. According to Mendenhall and Sinich 2016 [see @mendenhall], we need to make the following assumptions about $\epsilon$ in order to estimate the $\beta$ parameters. These assumptions are: 
 
 * The mean of the probability distribution of $\epsilon$ is 0. 
 * The variance of the probability distribution of $\epsilon$ is constant for all settings of the independent variable x.
@@ -264,7 +245,7 @@ ciReg(wine.va,conf.level=0.95,print.out=TRUE)
 
 ## The Least-Squares Estimates
 
-$$\hat{\beta_{0a}}+\hat{\beta_{1a}}x_i=1.87497+0.36084x_i$$ $$\hat{\beta_{0v}}+\hat{\beta_{1v}}x_i=6.56575-1.76144x_i$$ The slope $\hat{\beta_{1a}}=0.36084$ tells us that the quality rises 0.36084 for every 1 increase in alcohol. The slope $\hat{\beta_{1v}}=-1.76144$ tells us that the quality lowers -1.76144 for every 1 increase in volatile acidity.
+$$\hat{\beta_{0a}}+\hat{\beta_{1a}}x_i=1.87497+0.36084x_i$$ $$\hat{\beta_{0v}}+\hat{\beta_{1v}}x_i=6.56575-1.76144x_i$$ The slope $\hat{\beta_{1a}}=0.36084$ tells us that the quality rises 0.36084 for every 1 increase in alcohol. The slope $\hat{\beta_{1v}}=-1.76144$ tells us that the quality lowers 1.76144 for every 1 increase in volatile acidity.
 
 # Verifying Assumptions
 
@@ -499,7 +480,7 @@ The pvalues for these anova sets and significantly below 0.05, so this test reje
 
 # Avoiding Bias with Cook's Distance
 
-Biases can skew the data you are trying to analyze. Biases are often caused by outliers. Outliers can influence trends and skew the overall quality of the data. Cook's distance calculates the effects of removing said outliers. It estimates the influence that the data point has on the output. If the point is far enough away from other values, we need to take a deeper look at the data without these points.
+Biases can skew the data you are trying to analyze. Biases are often caused by outliers. Outliers can influence trends and skew the overall quality of the data. Cook's distance calculates the effects of removing said outliers. It estimates the influence that the data point has on the output. If the point is far enough away from other values, we need to take a deeper look at the data without these points. [see @wiki]
 
 ## Alcohol
 ```{r}
@@ -530,7 +511,7 @@ The multiple $R^2$ for the model increased to 0.1563, but it did not increase en
 
 # Conclusion
 
-In conclusion, there is no linear correlation between the physiochemical properties and the quality of the wine. The dataset has high variations from the fitted line and is at best is around a 23% match to the model (for quality~alcohol). While there might be "peak" points in this data, it does not help us when trying to find a linear trend. As with most things, such as cooking, we can expect that adding too much of one thing will decrease the quality. Knowing this, we could probably improve the data to fit the model by "stress-testing" each compound to find the point at which the quality begins to decrease indefinitely. This, along with recording each independent variable an even amount of times (i.e., if 10 tests were run on samples with an alcohol level of 9.4, then 10 tests should be run on samples with alcohol levels of 9.5, and so on), and measurements taken at more evenly spaced intervals, the data set would fit the linear model better, given there is a statistical relationship at all. The quadratic model ending up fitting the data better than the linear model, but just barely. I was unable to come up with any significant relationship between the properties of the wine and the overall quality. That being said, it does not mean that a correlation does not exist. It just means that I was unable to find a linear correlation given my skills in the subject area.
+In conclusion, there is no linear correlation between the physiochemical properties and the quality of the wine. The dataset has high variations from the fitted line and is at best is around a 23% match to the model (for quality~alcohol). While there might be "peak" points in this data, it does not help us when trying to find a linear trend. As with most things, such as cooking, we can expect that adding too much of one thing will decrease the quality. Knowing this, we could probably improve the data to fit the model by "stress-testing" each compound to find the point at which the quality begins to decrease indefinitely. This, along with recording each independent variable an even amount of times (i.e., if 10 tests were run on samples with an alcohol level of 9.4, then 10 tests should be run on samples with alcohol levels of 9.5, and so on), and measurements taken at more evenly spaced intervals, would make the data set fit the linear model better, given there is a statistical relationship at all. The quadratic model ending up fitting the data better than the linear model, but just barely. I was unable to come up with any significant relationship between the properties of the wine and the overall quality. That being said, it does not mean that a correlation does not exist. It just means that I was unable to find a linear correlation given my skills in the subject area.
 
 
 # References

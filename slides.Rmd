@@ -1,0 +1,167 @@
+---
+title: "project 2"
+author: "Kyle Murphey"
+date: "4/22/2020"
+output:
+  ioslides_presentation: default
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Intro
+
+Wine is one of humanities oldest alcoholic beverages. It has been used recreationally, religiously, and medicinally throughout the millennia. Wine was seen as a creation by the Greek god Dionysos (or Bacchus, if you were Roman) to the people. It was said that the god gifted the vine to a man named Ikarios. Ikarios used this gift to make wine, which he was inclined to share with his fellow people. When he shared the wine, the others got freaked out by the effects, thinking that they had been poisoned. They ended up murdering Ikarios, and his creation spread from there.
+
+## Data
+
+This data is pulled from a 2009 study in which researchers at the University of Minho in Portugal attempted to predict taste preferences using physiochemical properties of red wine. The dataset contains 1599 samples with 11 different chemical properties and the qualities for each sample. The properties measured are the fixed acidity, volatile acidity, citric acid, residual sugar, chlorides, free sulfur dioxide, total sulfur dioxide, density, pH, sulphates, and alcohol. The quality is based on a scale of 1 (worst) to 10 (best).
+
+## Relavant Data
+```{r, echo=FALSE}
+wine=read.csv("winequality-red.csv")
+wine.va=lm(wine$quality~wine$volatile.acidity,data=wine)
+wine.stder=rstandard(wine.va)
+
+par(mfrow=c(2,2))
+plot(wine$volatile.acidity,wine$quality, main="Scatterplot of volatile acidity vs. quality")
+plot(wine.va,which=1)
+hist(wine$volatile.acidity, main="Histogram of volatile acidity")
+```
+
+## Relavant Data
+```{r, echo=FALSE}
+wine.alc=lm(wine$quality~wine$alcohol,data=wine)
+wine.stder=rstandard(wine.alc)
+
+par(mfrow=c(2,2))
+plot(wine$alcohol,wine$quality, main="Scatterplot of alcohol vs. quality")
+plot(wine.alc,which=1)
+hist(wine$alcohol, main="Histogram of alcohol")
+```
+
+## Data Summary
+```{r}
+summary(wine.alc)
+```
+## Data Summary
+```{r}
+summary(wine.va)
+```
+## Data Summary
+With multiple $R^2$ values of 0.2267 and 0.1525, respectively. While very low, they are the best I have to work with.
+Based on these summaries, we can say that $$\hat{\beta_{0a}}=1.87497$$ $$\hat{\beta_{1a}}=0.36084$$ and $$\hat{\beta_{0v}}=6.56575$$ $$\hat{\beta_{1v}}=-1.76144$$
+
+## Linear Look
+```{r}
+plot(wine$quality~wine$alcohol,bg="Purple",pch=21,cex=1.2,data=wine)
+abline(wine.alc)
+```
+
+## Linear Look
+```{r}
+plot(wine$quality~wine$volatile.acidity,bg="Blue",pch=21,cex=1.2,data=wine)
+abline(wine.va)
+```
+
+## Linear Look
+
+As you can see, the data does not appear to follow a linear trend.
+
+
+## Residuals
+```{r}
+plot(wine$quality~wine$alcohol,bg="Green",pch=21,cex=1.2,data=wine)
+abline(wine.alc)
+yhata=with(wine,predict(wine.alc,data.frame(alcohol)))
+with(wine,{segments(alcohol,quality,alcohol,yhata)})
+abline(wine.alc)
+```
+There is quite a bit of deviation from the fitted line as you can see.
+
+## Residuals
+```{r}
+plot(wine$quality~wine$volatile.acidity,bg="Maroon",pch=21,cex=1.2,data=wine)
+abline(wine.va)
+yhatv=with(wine,predict(wine.va,data.frame(volatile.acidity)))
+with(wine,{segments(volatile.acidity,quality,volatile.acidity,yhatv)})
+abline(wine.va)
+```
+There is quite a bit of deviation from the fitted line as you can see.
+
+## Specifying the Probability Distribution
+```{r}
+library(s20x)
+trendscatter(quality~alcohol,f=0.5,data=wine,main="Quality vs Alcohol")
+```
+Based on this trend, the quality rises as the alcohol levels do.
+
+## Specifying the Probability Distribution
+```{r}
+trendscatter(quality~volatile.acidity,f=0.5,data=wine,main="Quality vs Volatile Acidity")
+```
+Based on this trend, the quality lowers as the volatile acidity levels increase
+
+## Normality
+```{r}
+normcheck(wine.alc,shapiro.wilk=TRUE)
+```
+We obtain a p-value of 0, so we reject the Null hypothesis that the errors are distributed normally. The results of the Shapiro-Wilk test tell us that we have enough evidence to reject the null hypothesis (p-value of 0).
+
+## Normality
+```{r}
+normcheck(wine.va,shapiro.wilk=TRUE)
+```
+We obtain a p-value of 0, so we reject the Null hypothesis that the errors are distributed normally. The results of the Shapiro-Wilk test tell us that we have enough evidence to reject the null hypothesis (p-value of 0).
+
+## Quadratic Model
+```{r}
+quada.lm=lm(quality~alcohol+I(alcohol^2),data=wine)
+plot(quality~alcohol,data=wine)
+myplot=function(x){quada.lm$coef[1]+quada.lm$coef[2]*x+quada.lm$coef[3]*x^2}
+curve(myplot,lwd=2,add=TRUE)
+```
+
+## Quadratic Model
+```{r}
+quadv.lm=lm(quality~volatile.acidity+I(volatile.acidity^2),data=wine)
+plot(quality~volatile.acidity,data=wine)
+myplot=function(x){quadv.lm$coef[1]+quadv.lm$coef[2]*x+quadv.lm$coef[3]*x^2}
+curve(myplot,lwd=2,add=TRUE)
+```
+
+## Quadratic Model
+
+The line is very similar to the linear trend line, so this model probably isn't the best either. However, the multiple $R^2$ value slightly increased for each, so it is a better fit than the linear model.
+
+## Cook's Distance (Alcohol)
+```{r}
+cooks20x(wine.alc)
+```
+As you can see, 653 is a major outlier in this data.
+
+## Cook's Distance (Alcohol)
+```{r}
+wine2.alc=lm(quality~alcohol,data=wine[-653,])
+summary(wine2.alc)
+```
+
+## Cook's Distance (Alcohol)
+The multiple $R^2$ for the model increased to 0.2314, but it did not increase enough say that this point had enough sway to throw the whole model off.
+
+## Conclusion
+In conclusion, there is no linear correlation between the physiochemical properties and the quality of the wine. The dataset has high variations from the fitted line and is at best is around a 23% match to the model (for quality~alcohol). While there might be "peak" points in this data, it does not help us when trying to find a linear trend. As with most things, such as cooking, we can expect that adding too much of one thing will decrease the quality. Knowing this, we could probably improve the data to fit the model by "stress-testing" each compound to find the point at which the quality begins to decrease indefinitely. The quadratic model ending up fitting the data better than the linear model, but just barely. I was unable to come up with any significant relationship between the properties of the wine and the overall quality. That being said, it does not mean that a correlation does not exist. It just means that I was unable to find a linear correlation given my skills in the subject area.
+
+
+
+
+
+
+
+
+
+
+
+
