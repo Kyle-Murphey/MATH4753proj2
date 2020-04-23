@@ -366,29 +366,6 @@ Testing[^1]
 
 [^1]: A little footnote
 
-### Plot data
-
-```{r carcharacteristics, fig.height = 5, fig.cap = "MTCARS",fig.align='center',fig.cap="Graph of data with loess smoother"}
-library(ggplot2)
-g = ggplot(mtcars, aes(x = disp, y = mpg, color = cyl)) + geom_point()
-g = g + geom_smooth(method = "loess")
-g
-```
-
-
-## How were the data collected? 
-
-## What is the story behind the data?
-
-## Why was it gathered? 
-
-## What is your interest in the data?
-
-### Include pictures `![](jpeg)`
-
-## What problem do you wish to solve?
-
-
 
 # Theory behind the Analysis
 
@@ -575,54 +552,84 @@ trendscatter(wine.resv~wine.fitv,f=0.5,data=wine.alc,xlab="Fitted",ylab="Residua
 
 The line is not very straight about 0 on the y-axis, so the plot is "unsatisfactory".
 
+## Check Normality
+
+### Alcohol
+```{r}
+normcheck(wine.alc,shapiro.wilk=TRUE)
+```
+
+We obtain a p-value of 0, so we reject the Null hypothesis that the errors are distributed normally. The results of the Shapiro-Wilk test tell us that we have enough evidence to reject the null hypothesis (p-value of 0). This tells us that the data is not distributed normally.
 
 
-## Checks on validity
+### Volatile Acidity
+```{r}
+normcheck(wine.va,shapiro.wilk=TRUE)
+```
 
-### Straight trend line  
+We obtain a p-value of 0, so we reject the Null hypothesis that the errors are distributed normally. The results of the Shapiro-Wilk test tell us that we have enough evidence to reject the null hypothesis (p-value of 0). This tells us that the data is not distributed normally.
 
-#### Use trendscatter
+## Testing Another Model
 
-### Errors distributed Normally
+As we can see, a linear model is not the best model for the data. Here, we will test a quadratic model for the dataset.
 
-$$\epsilon_i \sim N(0,\sigma^2)$$
+```{r}
+quada.lm=lm(quality~alcohol+I(alcohol^2),data=wine)
+plot(quality~alcohol,data=wine)
+myplot=function(x){quada.lm$coef[1]+quada.lm$coef[2]*x+quada.lm$coef[3]*x^2}
+curve(myplot,lwd=2,add=TRUE)
+summary(quada.lm)
+```
+
+```{r}
+quadv.lm=lm(quality~volatile.acidity+I(volatile.acidity^2),data=wine)
+plot(quality~volatile.acidity,data=wine)
+myplot=function(x){quadv.lm$coef[1]+quadv.lm$coef[2]*x+quadv.lm$coef[3]*x^2}
+curve(myplot,lwd=2,add=TRUE)
+summary(quadv.lm)
+```
+
+The line is very similar to the linear trend line, so this model probably isn't the best either. However, the multiple $R^2$ value slightly increased for each, so it is a better fit than the linear model.
+
+### Residuals vs Fitted
+
+```{r}
+qwine.resa=residuals(quada.lm)
+fwine.fita=fitted(quada.lm)
+trendscatter(qwine.resa~fwine.fita,f=0.5,data=wine.alc,xlab="Fitted",ylab="Residuals",main="Residuals vs Alcohol Fitted Values")
+```
+```{r}
+qwine.resv=residuals(quadv.lm)
+fwine.fitv=fitted(quadv.lm)
+trendscatter(qwine.resv~fwine.fitv,f=0.5,data=wine.alc,xlab="Fitted",ylab="Residuals",main="Residuals vs Volatile Acidity Fitted Values")
+```
+
+Each trend line is not straight about 0 on the y-axis, so the plots are "unsatisfactory".
+
+### Normality
+```{r}
+normcheck(quada.lm,shapiro.wilk=TRUE)
+normcheck(quadv.lm,shapiro.wilk=TRUE)
+```
+
+We obtain a p-value of 0 for both, so we reject the Null hypothesis that the errors are distributed normally. The results of the Shapiro-Wilk test tell us that we have enough evidence to reject the null hypothesis (p-value of 0). This tells us that the data is not distributed normally.
+
+### Comparing Models
+
+While neither model is very good for the data, we have evidence that the quadratic model is a better fit than the linear. For the linear model, we obtained 0.2267 and 0.1525 for the multiple $R^2$ values for alcohol and volatile acidity, respectively. In the quadratic model, we obtained 0.228 and 0.1544 for the multiple $R^2$ values for alcohol and volatile acidity, respectively. Although only slightly higher, this still indicates that a quadratic model will fit better than a linear model.
+
+
+# ANOVA as Confirmation
 
 
 
-#### Shapiro-wilk
 
-### Constant variance
-
-#### Residual vs fitted values
-
-#### trendscatter on Residual Vs Fitted
-
-### Zero mean value of $\epsilon$
-
-### Independence of data 
-
-# Model selection if you compared models 
 
 ## Use adjusted $R^2$ 
 $$R_{adj}^2 =$$
 
 
 
-# Analysis of the data
-
-## Make sure you include many great plots
-
-## Add the trend to the data
-
-
-## Summary lm object
-
-### Interpretation of all tests
-### Interpretation of multiple R squared
-### Interpretation of all point estimates
-## Calculate cis for $\beta$ parameter estimates
-### Use of `predict()`
-### Use of `ciReg()`
 
 ### Check on outliers using cooks plots
 
