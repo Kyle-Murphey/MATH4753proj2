@@ -443,19 +443,138 @@ The residuals tell us by how much points deviate from the fitted line. They help
 ```{r}
 plot(wine$quality~wine$alcohol,bg="Green",pch=21,cex=1.2,data=wine)
 abline(wine.alc)
-yhat=with(wine,predict(wine.alc,data.frame(alcohol)))
-with(wine,{segments(alcohol,quality,alcohol,yhat)})
+yhata=with(wine,predict(wine.alc,data.frame(alcohol)))
+with(wine,{segments(alcohol,quality,alcohol,yhata)})
 abline(wine.alc)
 ```
 ```{r}
 plot(wine$quality~wine$volatile.acidity,bg="Maroon",pch=21,cex=1.2,data=wine)
 abline(wine.va)
-yhat=with(wine,predict(wine.va,data.frame(volatile.acidity)))
-with(wine,{segments(volatile.acidity,quality,volatile.acidity,yhat)})
+yhatv=with(wine,predict(wine.va,data.frame(volatile.acidity)))
+with(wine,{segments(volatile.acidity,quality,volatile.acidity,yhatv)})
 abline(wine.va)
 ```
 
 As you can see, there is *quite* a lot of deviation from the line.
+
+## Plot of Means
+
+We can see the difference between the means of alcohol and quality, and volatile acidity and quality by graphing quality vs alcohol and quality vs volatile acidity. I will also show then deviations from the fitted line. This also gives us the RSS.
+```{r}
+plot(wine$quality~wine$alcohol,bg="Blue",pch=21,cex=1.2,data=wine)
+abline(wine.alc)
+with(wine,abline(h=mean(quality)))
+abline(wine.alc)
+with(wine,{segments(alcohol,mean(quality),alcohol,yhata,col="Red")})
+```
+```{r}
+plot(wine$quality~wine$volatile.acidity,bg="Cyan",pch=21,cex=1.2,data=wine)
+abline(wine.va)
+with(wine,abline(h=mean(quality)))
+abline(wine.va)
+with(wine,{segments(volatile.acidity,mean(quality),volatile.acidity,yhatv,col="maroon")})
+```
+
+## Plot of Means with Total Deviation Line Segments
+
+If we plot the means of quality vs alcohol and quality vs volatile acidity and add the total deviation lines, we can visually see $\hat{y}=\bar{y}$. This also gives us the MSS.
+```{r}
+plot(wine$quality~wine$alcohol,bg="Blue",pch=21,cex=1.2,data=wine)
+with(wine,abline(h=mean(quality)))
+with(wine,{segments(alcohol,quality,alcohol,mean(quality),col="Red")})
+```
+```{r}
+plot(wine$quality~wine$volatile.acidity,bg="Green",pch=21,cex=1.2,data=wine)
+with(wine,abline(h=mean(quality)))
+with(wine,{segments(volatile.acidity,quality,volatile.acidity,mean(quality),col="Maroon")})
+```
+
+## Using RSS, MSS, and TSS
+
+```{r}
+RSSa=with(wine,sum((quality-yhata)^2))
+RSSa
+
+MSSa=with(wine,sum((yhata-mean(quality))^2))
+MSSa
+
+TSSa=with(wine,sum((quality-mean(quality))^2))
+TSSa
+
+
+RSSv=with(wine,sum((quality-yhatv)^2))
+RSSv
+
+MSSv=with(wine,sum((yhatv-mean(quality))^2))
+MSSv
+
+TSSv=with(wine,sum((quality-mean(quality))^2))
+TSSv
+```
+Since $R^2$ = $\frac{MSS}{TSS}$, which will be the value for the trend line. The higher the percentage, the better the fit for the data.
+```{r}
+MSSa/TSSa
+MSSv/TSSv
+```
+We get a 22.67% fit for alcohol and a 12.25% for volatile acidity. These percentages are very low, and indicate that a linear model is not the best fit. 
+
+
+## Specifying the Probability Distribution
+
+```{r}
+trendscatter(quality~alcohol,f=0.5,data=wine,main="Quality vs Alcohol")
+```
+
+Based on this trend, the quality rises as the alcohol levels do.
+```{r}
+trendscatter(quality~volatile.acidity,f=0.5,data=wine,main="Quality vs Volatile Acidity")
+```
+
+Based on this trend, the quality lowers as the volatile acidity levels increase
+
+Residuals:
+```{r}
+wine.resa=residuals(wine.alc)
+wine.resv=residuals(wine.va)
+```
+Fitted:
+```{r}
+wine.fita=fitted(wine.alc)
+wine.fitv=fitted(wine.va)
+```
+
+## Plot the Residuals vs Alcohol
+
+```{r}
+plot(wine$alcohol,wine.resa,ylab="Residuals")
+```
+
+The residuals are not symmetrically distributed about 0 on the y-axis, this tells us that there is a lot of deviation from the best fit line.
+
+## Plot the Residuals vs Volatile Acidity
+
+```{r}
+plot(wine$volatile.acidity,wine.resv,ylab="Residuals")
+```
+
+The residuals are not symmetrically distributed about 0 on the y-axis, this tells us that there is a lot of deviation from the best fit line.
+
+## Plot the Residuals vs Alcohol Fitted values
+
+```{r}
+trendscatter(wine.resa~wine.fita,f=0.5,data=wine.alc,xlab="Fitted",ylab="Residuals",main="Residuals vs Alcohol Fitted Values")
+```
+
+The line is not very straight about 0 on the y-axis, so the plot is "unsatisfactory".
+
+## Plot the Residuals vs Volatile Acidity Fitted values
+
+```{r}
+trendscatter(wine.resv~wine.fitv,f=0.5,data=wine.alc,xlab="Fitted",ylab="Residuals",main="Residuals vs Volatile Acidity Fitted Values")
+```
+
+The line is not very straight about 0 on the y-axis, so the plot is "unsatisfactory".
+
 
 
 ## Checks on validity
